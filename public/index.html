@@ -67,6 +67,89 @@ body{
 }
 button{font-family:inherit; cursor:pointer;}
 ::selection{background:var(--ion-dim); color:var(--text-1);}
+
+#splash-screen{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#020d1e;
+  opacity:1;
+  visibility:visible;
+  transition:opacity .45s ease, visibility .45s ease;
+}
+#splash-screen::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at center, rgba(76,243,255,0.08), transparent 36%);
+}
+#splash-screen.is-exiting{
+  opacity:0;
+  visibility:hidden;
+}
+.splash-visual{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:min(88vw, 1200px);
+  max-width:92vw;
+  aspect-ratio: 16 / 7;
+}
+.splash-visual img{
+  position:relative;
+  display:block;
+  width:100%;
+  height:auto;
+  clip-path:inset(0 100% 0 0);
+  -webkit-clip-path:inset(0 100% 0 0);
+  filter:drop-shadow(0 20px 44px rgba(21, 28, 62, 0.8));
+  animation:splashReveal 1.2s cubic-bezier(.18,.8,.24,1) forwards;
+}
+.splash-sheen{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:-8%;
+  width:20%;
+  pointer-events:none;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(107,221,255,0.35) 20%,
+    rgba(169,127,255,0.8) 50%,
+    rgba(255,255,255,0) 100%);
+  filter:blur(14px);
+  opacity:0;
+  transform:translateX(-140%);
+  animation:splashSweep 1.2s cubic-bezier(.18,.8,.24,1) forwards;
+}
+#splash-screen.is-exiting .splash-visual img,
+#splash-screen.is-exiting .splash-sheen{
+  animation:splashOut .42s ease forwards;
+}
+@keyframes splashReveal{
+  0%{ clip-path:inset(0 100% 0 0); -webkit-clip-path:inset(0 100% 0 0); opacity:0; }
+  15%{ opacity:1; }
+  100%{ clip-path:inset(0 0 0 0); -webkit-clip-path:inset(0 0 0 0); opacity:1; }
+}
+@keyframes splashSweep{
+  0%{ opacity:0; transform:translateX(-140%); }
+  10%{ opacity:1; }
+  55%{ opacity:1; }
+  100%{ opacity:0; transform:translateX(420%); }
+}
+@keyframes splashOut{
+  0%{ opacity:1; filter:blur(0); }
+  100%{ opacity:0; filter:blur(10px); }
+}
+@media (prefers-reduced-motion: reduce){
+  #splash-screen{ transition:none; }
+  .splash-visual img, .splash-sheen{ animation:none; opacity:1; clip-path:none; -webkit-clip-path:none; transform:none; filter:none; }
+  #splash-screen.is-exiting .splash-visual img, #splash-screen.is-exiting .splash-sheen{ animation:none; opacity:0; }
+}
 ::-webkit-scrollbar{width:8px; height:8px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--panel-border); border-radius:8px;}
@@ -104,7 +187,9 @@ button{font-family:inherit; cursor:pointer;}
 .reduced-motion .orb, .reduced-motion .bg-grid{ animation:none !important; }
 
 /* ============ APP SHELL ============ */
-.app{ position:relative; z-index:1; display:flex; height:100vh; height:100dvh; }
+.app{ position:relative; z-index:1; display:flex; height:100vh; height:100dvh; opacity:0; transform:translateY(12px); visibility:hidden; pointer-events:none; transition:opacity .5s ease, transform .5s ease, visibility .5s ease; }
+.app.is-ready{ opacity:1; transform:translateY(0); visibility:visible; pointer-events:auto; }
+.app-loading{ opacity:0; transform:translateY(12px); visibility:hidden; }
 
 /* ============ LOGO MARK (signature element) ============ */
 .mark{ position:relative; width:30px; height:30px; flex:none; }
@@ -374,6 +459,7 @@ button{font-family:inherit; cursor:pointer;}
 .composer-inner{ max-width:820px; margin:0 auto; }
 
 .attach-chips{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+.generated-preview{ display:block; width:min(280px, 100%); max-height:280px; object-fit:contain; margin:8px 0 4px; border:1px solid var(--line); border-radius:8px; background:#090b12; }
 .attach-chip{ display:flex; align-items:center; gap:7px; background:var(--bg-elev-2); border:1px solid var(--panel-border); border-radius:10px; padding:6px 8px 6px 10px; font-size:12px; color:var(--text-1); }
 .attach-chip-error{ border-color:var(--danger); background:var(--plasma-dim); }
 .attach-chip .a-ico{ color:var(--ion); display:flex; }
@@ -505,6 +591,13 @@ button{font-family:inherit; cursor:pointer;}
 </head>
 <body>
 
+<div id="splash-screen" aria-live="polite" aria-label="REVEXON intro screen">
+  <div class="splash-visual" aria-hidden="true">
+    <div class="splash-sheen"></div>
+    <img src="/logo.png" alt="REVEXON logo" />
+  </div>
+</div>
+
 <div class="bg-fx">
   <div class="bg-grid"></div>
   <div class="orb orb-1"></div>
@@ -512,7 +605,7 @@ button{font-family:inherit; cursor:pointer;}
   <div class="orb orb-3"></div>
 </div>
 
-<div class="app" id="app">
+<div class="app app-loading" id="app">
 
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar" aria-label="Conversation sidebar">
@@ -572,6 +665,7 @@ button{font-family:inherit; cursor:pointer;}
       </div>
       <div class="topbar-right">
         <div class="chip-live" id="apiStatusChip"><span class="blip" id="apiStatusBlip"></span><span id="apiStatusText">Connecting…</span></div>
+        <div class="chip-live" id="usageChip" style="min-width:126px; justify-content:center;" aria-label="Usage">0/0</div>
         <button class="icon-btn" id="exportBtn" aria-label="Export conversation" title="Export chat">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
         </button>
@@ -594,6 +688,9 @@ button{font-family:inherit; cursor:pointer;}
               <input type="file" id="fileInput" multiple hidden accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.csv,.docx">
               <button class="icon-btn" id="attachBtn" aria-label="Attach files" title="Attach files">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              <button class="icon-btn" id="imageGenerateBtn" aria-label="Generate image" title="Generate image">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="7"/></svg>
               </button>
             </div>
             <textarea id="msgInput" rows="1" placeholder="Message REVEXON.AI..." aria-label="Message REVEXON.AI"></textarea>
@@ -793,6 +890,40 @@ const MODELS = [
 const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>Array.from(r.querySelectorAll(s));
 
+const splashScreen = document.getElementById("splash-screen");
+const appEl = document.getElementById("app");
+
+function initSplashScreen(){
+  const shouldSkip = sessionStorage.getItem("revexon_splash_shown") === "true";
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if(!splashScreen || !appEl){
+    return;
+  }
+
+  if(shouldSkip){
+    splashScreen.remove();
+    appEl.classList.add("is-ready");
+    return;
+  }
+
+  const revealDuration = reduceMotion ? 0 : 1200;
+  const holdDuration = reduceMotion ? 0 : 400;
+  const exitDuration = reduceMotion ? 120 : 420;
+  const totalDuration = revealDuration + holdDuration;
+
+  setTimeout(()=>{
+    splashScreen.classList.add("is-exiting");
+    appEl.classList.add("is-ready");
+    setTimeout(()=>{
+      splashScreen.remove();
+      sessionStorage.setItem("revexon_splash_shown", "true");
+    }, exitDuration);
+  }, totalDuration);
+}
+
+document.addEventListener("DOMContentLoaded", initSplashScreen);
+
 const sidebar = $("#sidebar"), collapseBtn=$("#collapseBtn"), sidebarScrim=$("#sidebarScrim");
 const convGroups = $("#convGroups"), searchInput=$("#searchInput");
 const chatInner = $("#chatInner"), chatScroll=$("#chatScroll");
@@ -802,8 +933,11 @@ const composer = $("#composer");
 const modelPillBtn=$("#modelPillBtn"), modelPillLabel=$("#modelPillLabel"), modelPopover=$("#modelPopover");
 const settingsScrim=$("#settingsScrim");
 const micBtn=$("#micBtn"), micOverlay=$("#micOverlay"), micStatusText=$("#micStatusText"), micCancelBtn=$("#micCancelBtn");
+const usageChip = $("#usageChip");
+const imageGenerateBtn = $("#imageGenerateBtn");
 
 let pendingAttachments = [];
+const attachmentPreviewCache = new Map();
 let isGenerating = false;
 let currentStreamStop = null;
 let searchQuery = "";
@@ -1122,7 +1256,13 @@ function aiAvatarSvg(){
 }
 function attachmentsHtml(atts){
   if(!atts || !atts.length) return "";
-  return `<div class="attach-chips" style="margin-top:8px;">${atts.map(a=>`<div class="attach-chip"><span class="a-ico">${fileIcon(a.type)}</span><span class="a-name">${escapeHtml(a.name)}</span></div>`).join("")}</div>`;
+  return `<div class="attach-chips" style="margin-top:8px;">${atts.map(a=>{
+    const preview = attachmentPreviewCache.get(a.id);
+    return `<div class="attach-chip-wrap">
+      ${preview ? `<img class="generated-preview" src="data:${escapeHtml(preview.mimeType)};base64,${preview.base64}" alt="${escapeHtml(a.name)}">` : ""}
+      <div class="attach-chip"><span class="a-ico">${fileIcon(a.type)}</span><span class="a-name">${escapeHtml(a.name)}</span></div>
+    </div>`;
+  }).join("")}</div>`;
 }
 
 function bindMessageActions(){
@@ -1442,11 +1582,14 @@ async function uploadAndAttach(file){
 
 function renderAttachChips(){
   attachChips.innerHTML = pendingAttachments.map((a)=>`
-    <div class="attach-chip ${a.status==='error'?'attach-chip-error':''}" title="${a.status==='error' ? escapeHtml(a.error||'') : (a.warning ? escapeHtml(a.warning) : '')}">
+    <div class="attach-chip-wrap">
+      ${a.kind === "image" && a.base64 ? `<img class="generated-preview" src="data:${escapeHtml(a.mimeType || "image/png")};base64,${a.base64}" alt="${escapeHtml(a.name)}">` : ""}
+      <div class="attach-chip ${a.status==='error'?'attach-chip-error':''}" title="${a.status==='error' ? escapeHtml(a.error||'') : (a.warning ? escapeHtml(a.warning) : '')}">
       <span class="a-ico">${a.status==='uploading' ? spinnerIcon() : fileIcon(a.type)}</span>
       <span class="a-name">${escapeHtml(a.name)}</span>
       ${a.status==='error' ? '<span style="color:var(--danger); font-size:10px;">failed</span>' : ''}
       <button class="a-remove" data-id="${a.id}" aria-label="Remove attachment"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+      </div>
     </div>`).join("");
   $$(".a-remove", attachChips).forEach(b=> b.addEventListener("click", ()=>{
     pendingAttachments = pendingAttachments.filter(a=>a.id!==b.dataset.id);
@@ -1454,6 +1597,65 @@ function renderAttachChips(){
   }));
 }
 function spinnerIcon(){ return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.8s linear infinite"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"/><path d="M21 12a9 9 0 00-9-9"/></svg>`; }
+
+async function refreshUsageMeter(){
+  try {
+    const res = await fetch(API_BASE_URL()+"/api/usage");
+    if(!res.ok) return;
+    const data = await res.json();
+    const used = Number(data.tokensUsed || 0);
+    const limit = Number(data.limit || 0);
+    const imageGen = Number(data.featureUsage?.image_gen?.requestCount || 0);
+    usageChip.textContent = limit ? `${used.toLocaleString()} / ${limit.toLocaleString()} tokens` : `Usage ${used.toLocaleString()}`;
+    usageChip.title = `Chat tokens: ${used.toLocaleString()} / ${limit.toLocaleString()}\nImage gen: ${imageGen}/${Number(data.limits?.image_gen || 0)}`;
+  } catch (err) {
+    console.error("Usage meter failed:", err);
+  }
+}
+
+async function generateImageFromPrompt(){
+  const prompt = msgInput.value.trim();
+  if(!prompt){
+    toast("info", "Type an image description in the message box first.");
+    msgInput.focus();
+    return;
+  }
+  try {
+    const res = await fetch(API_BASE_URL()+"/api/generate-image", {
+      method:"POST",
+      headers: jsonHeaders(),
+      body: JSON.stringify({ prompt: prompt.trim() })
+    });
+    const data = await res.json();
+    if(!res.ok) {
+      throw new Error(data.error || "Image generation failed.");
+    }
+    const attachment = {
+      id: "a" + Date.now() + Math.random().toString(36).slice(2),
+      name: "generated-image.png",
+      type: "image",
+      kind: "image",
+      status: "ready",
+      source: "generated",
+      mimeType: data.mimeType || "image/png",
+      base64: data.base64 || null,
+      url: data.url || null,
+      size: 0,
+    };
+    attachmentPreviewCache.set(attachment.id, { mimeType: attachment.mimeType, base64: attachment.base64 });
+    pendingAttachments.push(attachment);
+    msgInput.value = "";
+    msgInput.dispatchEvent(new Event("input", { bubbles:true }));
+    renderAttachChips(); updateSendState();
+    toast("success", "Generated image attached.");
+    refreshUsageMeter();
+  } catch (err) {
+    console.error("Generate image failed:", err);
+    toast("error", err.message || "Image generation failed.");
+  }
+}
+
+imageGenerateBtn.addEventListener("click", generateImageFromPrompt);
 
 /* ============ VOICE INPUT ============ */
 let recognition = null, listening=false;
@@ -1939,6 +2141,7 @@ applyTheme(); applyAnimations(); applyChatPrefs();
 renderModelPopover();
 modelPillLabel.textContent = MODELS.find(m=>m.id===state.settings.model)?.name || "REVEXON Pro";
 checkApiHealth();
+refreshUsageMeter();
 
 convGroups.innerHTML = `<div class="empty-conv">Loading conversations…</div>`;
 convApi.loadAll().then(data=>{
