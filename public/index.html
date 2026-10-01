@@ -107,7 +107,7 @@ button{font-family:inherit; cursor:pointer;}
   clip-path:inset(0 100% 0 0);
   -webkit-clip-path:inset(0 100% 0 0);
   filter:drop-shadow(0 20px 44px rgba(21, 28, 62, 0.8));
-  animation:splashReveal 1.2s cubic-bezier(.18,.8,.24,1) forwards;
+  animation:splashReveal 2.5s cubic-bezier(.18,.8,.24,1) forwards;
 }
 .splash-sheen{
   position:absolute;
@@ -124,7 +124,7 @@ button{font-family:inherit; cursor:pointer;}
   filter:blur(14px);
   opacity:0;
   transform:translateX(-140%);
-  animation:splashSweep 1.2s cubic-bezier(.18,.8,.24,1) forwards;
+  animation:splashSweep 2.5s cubic-bezier(.18,.8,.24,1) forwards;
 }
 #splash-screen.is-exiting .splash-visual img,
 #splash-screen.is-exiting .splash-sheen{
@@ -581,11 +581,138 @@ button{font-family:inherit; cursor:pointer;}
 .compact-mode .chat-inner{ padding-top:14px; }
 
 @media (max-width:600px){
+  .splash-visual{ width:min(76vw, 380px); max-width:80vw; }
   .topbar{ padding:10px 12px; }
   .chat-inner{ padding:16px 12px 30px; }
   .composer-wrap{ padding:10px 12px 14px; }
   .welcome{ padding-top:6vh; }
   .composer-hint span:nth-child(2){ display:none; }
+}
+
+/* ============ RESPONSIVE LAYOUT POLISH ============ */
+html{ min-width:320px; }
+html, body{ overflow-x:clip; }
+body{ overscroll-behavior:none; }
+.app, .main, .chat-scroll, .chat-inner{ min-width:0; }
+.chat-inner{ overflow-wrap:anywhere; }
+.bubble pre, .bubble table{ max-width:100%; }
+.bubble pre{ overflow-x:auto; }
+
+@media (max-width:860px){
+  .sidebar{
+    width:min(320px, calc(100vw - 48px)) !important;
+    height:100vh;
+    height:100dvh;
+    padding-top:env(safe-area-inset-top, 0px);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  .sidebar-scrim{ touch-action:pan-y; }
+}
+
+@media (max-width:600px){
+  .topbar{
+    min-height:56px;
+    gap:7px;
+    padding:calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+  }
+  .topbar .icon-btn{ width:38px; height:38px; }
+  .topbar > div[style*="position:relative"]{ min-width:0; }
+  .model-pill{ max-width:min(46vw, 220px); padding:8px 10px; font-size:12px; }
+  .model-pill #modelPillLabel{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .model-popover{ width:min(280px, calc(100vw - 24px)); }
+  .topbar-right{ gap:4px; }
+  .chip-live#apiStatusChip{ min-width:28px; padding:7px; justify-content:center; }
+  .chip-live#apiStatusChip > span:last-child{ display:none; }
+  .chip-live#usageChip{ min-width:0 !important; padding:6px 7px; font-size:10px; }
+
+  .chat-inner{ padding:16px 14px 26px; }
+  .welcome{ padding:5vh 4px 0; }
+  .welcome .mark-lg{ width:52px; height:52px; margin-bottom:16px; }
+  .welcome h1{ font-size:clamp(27px, 8vw, 36px); }
+  .welcome .sub{ font-size:14px; }
+  .welcome .sub2{ font-size:12px; margin-bottom:22px; }
+  .prompt-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:9px; }
+  .prompt-card{ min-height:106px; padding:12px; gap:8px; }
+  .prompt-card .p-title{ font-size:12.5px; line-height:1.4; }
+
+  .msg{ gap:9px; margin-bottom:18px; }
+  .msg-avatar{ width:28px; height:28px; }
+  .bubble{ font-size:14px; line-height:1.62; }
+  .msg.user .bubble{ padding:10px 12px; }
+  .msg-actions{ opacity:1; }
+  .bubble table{ display:block; overflow-x:auto; white-space:nowrap; }
+  .bubble code.inline{ overflow-wrap:anywhere; }
+
+  .composer-wrap{
+    padding:8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg) 72%, transparent) 18%);
+  }
+  .composer{ border-radius:18px; padding:8px; gap:5px; }
+  .composer-row{ gap:4px; }
+  .composer-tools{ gap:1px; }
+  .composer-tools .icon-btn{ width:34px; height:36px; }
+  .composer textarea{ min-width:0; font-size:16px; line-height:1.45; padding:7px 2px; }
+  .send-btn{ width:36px; height:36px; }
+  .composer-foot{ padding:2px 3px 0; }
+  .composer-hint{ font-size:10px; }
+  .composer-hint kbd{ font-size:9px; }
+  .char-count{ font-size:10px; }
+  .disclaimer{ font-size:10px; margin-top:7px; }
+
+  .modal-scrim{ align-items:flex-end; padding:0; }
+  .modal{
+    width:100%;
+    max-width:none;
+    max-height:90vh;
+    max-height:90dvh;
+    border-radius:20px 20px 0 0;
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  .modal-head{ padding:15px 16px; }
+  .settings-tabs{ overflow-x:auto; flex:none; padding:8px 10px 0; scrollbar-width:none; }
+  .settings-tabs::-webkit-scrollbar{ display:none; }
+  .stab{ flex:none; padding:10px 12px; }
+  .settings-pane{ padding:14px 16px 18px; }
+  .set-row{ gap:12px; }
+  .set-desc{ max-width:260px; line-height:1.45; }
+  .toast-wrap{ width:calc(100% - 24px); bottom:calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .toast{ max-width:100%; }
+}
+
+@media (max-width:400px){
+  .topbar{ gap:5px; padding-left:8px; padding-right:8px; }
+  .topbar .icon-btn{ width:34px; height:36px; }
+  .model-pill{ max-width:43vw; gap:5px; padding:7px 8px; }
+  .chip-live#usageChip{ display:none; }
+  .chat-inner{ padding-left:11px; padding-right:11px; }
+  .prompt-grid{ gap:7px; }
+  .prompt-card{ padding:10px; min-height:98px; }
+  .composer-wrap{ padding-left:8px; padding-right:8px; }
+  .composer-tools .icon-btn{ width:30px; }
+  .composer-hint{ gap:6px; }
+}
+
+@media (max-width:360px){
+  .model-popover{ left:0; width:min(280px, calc(100vw - 70px)); }
+  .prompt-grid{ grid-template-columns:1fr; }
+  .prompt-card{ min-height:0; flex-direction:row; align-items:center; }
+  .prompt-card .p-ico{ flex:none; }
+  .settings-pane{ padding-left:12px; padding-right:12px; }
+  .theme-options{ gap:4px; }
+  .theme-opt{ padding:6px 8px; }
+}
+
+@media (max-height:520px) and (max-width:860px){
+  .welcome{ padding-top:18px; }
+  .welcome .mark-lg{ width:40px; height:40px; margin-bottom:10px; }
+  .welcome .sub2{ margin-bottom:14px; }
+  .prompt-card{ min-height:0; }
+  .composer-wrap{ padding-top:6px; padding-bottom:6px; }
+  .disclaimer{ display:none; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *, *::before, *::after{ scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
 }
 </style>
 </head>
@@ -907,7 +1034,7 @@ function initSplashScreen(){
     return;
   }
 
-  const revealDuration = reduceMotion ? 0 : 1200;
+  const revealDuration = reduceMotion ? 0 : 2500;
   const holdDuration = reduceMotion ? 0 : 400;
   const exitDuration = reduceMotion ? 120 : 420;
   const totalDuration = revealDuration + holdDuration;
